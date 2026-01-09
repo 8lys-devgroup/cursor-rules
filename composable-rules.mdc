@@ -1,0 +1,31 @@
+---
+description: Ensures all Cursor rules are composable and work together harmoniously
+globs: 
+alwaysApply: true
+---
+
+# Composable Rules
+
+All Cursor rules must be composable—they should work together without conflicts.
+
+## Requirements
+
+1. **Single Responsibility**: Each rule addresses one specific concern or domain
+2. **No Conflicts**: Rules must not contradict each other or create conflicting directives
+3. **Clear Scope**: Use `globs` to limit rule application to relevant files when appropriate
+4. **Modular Design**: Rules should be independent and combinable, not interdependent
+5. **Consistent Patterns**: Follow established patterns and conventions across rules
+
+## Before Creating a New Rule
+
+- Check existing rules for overlap or conflicts
+- Ensure the rule can coexist with all other active rules
+- Use `alwaysApply: false` and `globs` to limit scope when possible
+- Keep rules focused and avoid broad, catch-all directives
+
+## Anti-Patterns
+
+- ❌ Rules that override or contradict other rules
+- ❌ Rules that require specific ordering or dependencies
+- ❌ Rules that assume exclusive control over a domain
+- ❌ Rules with overlapping responsibilities
