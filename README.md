@@ -16,12 +16,8 @@ To update rules in existing projects:
 git submodule update --remote .cursor/rules
 ```
 
-## Structure
-
-- `rules/` - Rule files (`.mdc` format)
-
 ## Adding New Rules
 
-1. Create a `.mdc` file in `rules/`
+1. Create a `.mdc` file at repo root
 2. Commit and push
 3. Update submodules in dependent projects
