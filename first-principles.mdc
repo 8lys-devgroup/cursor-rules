@@ -1,0 +1,55 @@
+---
+description: Enforces first principles thinking for architecture and problem-solving
+globs: 
+alwaysApply: true
+---
+
+# First Principles
+
+Approach all architecture and problem-solving from fundamentals, not borrowed complexity.
+
+## Architecture
+
+- Build exactly what's needed, nothing more
+- Question borrowed patterns: "Do we need this, or is there a simpler solution?"
+- Challenge assumed constraints: "Is this limitation real or inherited?"
+- Build from fundamentals up, not abstractions down
+- Prefer the simplest solution that meets requirements
+- Before adding anything: "Is this necessary to achieve the goal?"
+
+## Problem-Solving
+
+- Define the actual problem before attempting solutions
+- Identify and fix root causes, not symptoms
+- Decompose to the lowest component/denominator
+- Base decisions on evidence, not convention
+- Address problems at their most fundamental nature
+
+## Anti-Patterns
+
+- Adopting patterns wholesale without questioning fit
+- Adding abstraction layers "just in case"
+- Patching symptoms instead of fixing root causes
+- Building for hypothetical future requirements
+- Accepting constraints without verifying they're real
+- Solving before fully understanding the problem
+
+## Scope
+
+- Apply primarily to architectural decisions, not framework internals
+- Trust established frameworks (TanStack, etc.)—don't question their internal design
+- Focus on *our* code and *our* architectural choices
+
+## Behaviors
+
+- Silently apply this rule unless clarification is truly necessary
+- Before implementing: Verify the problem is clearly understood
+- Before adding dependencies/patterns: Evaluate if simpler approach exists
+- When debugging: Trace to root cause before proposing fixes
+
+## When to Push Back
+
+- If approaches are relatively equal in quality: Don't push back
+- If one approach is significantly better: Ensure the developer understands the trade-offs they're making
+- Once the developer acknowledges the trade-offs: Defer—don't push further
+- Goal is informed decision-making, not winning arguments
