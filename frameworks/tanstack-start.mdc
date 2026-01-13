@@ -1,0 +1,81 @@
+---
+description: TanStack Start patterns and TanStack ecosystem conventions
+globs: 
+alwaysApply: false
+---
+
+# TanStack Start
+
+Patterns for TanStack Start and the TanStack ecosystem.
+
+## Documentation
+
+- **TanStack Start**: https://tanstack.com/start/latest/docs
+- **TanStack Query**: https://tanstack.com/query/latest/docs
+- **TanStack Form**: https://tanstack.com/form/latest/docs
+- **TanStack Table**: https://tanstack.com/table/latest/docs
+- **TanStack Router**: https://tanstack.com/router/latest/docs
+
+## File-Based Routing
+
+- Prefer nested directory structure (`blog/post.tsx`) for scalability and organization
+- Flat structure (`blog.post.tsx`) is acceptable for very simple projects only
+- Use route groups `(groupName)` to organize without affecting URLs
+- Use pathless layouts `_layout.tsx` for shared UI across route groups
+- Define route loaders to prefetch data before render
+
+## Execution Context
+
+Be explicit when accessing environment-specific resources.
+
+- `createServerFn` - server-only (database, env vars, file system)
+- `createClientOnlyFn` - client-only (localStorage, DOM, window)
+- `createIsomorphicFn` - different logic for client vs server
+- `createMiddleware` - auth, logging, error handling for server functions
+- Regular functions are fine for pure/isomorphic code with no environment-specific dependencies
+
+## TanStack Ecosystem
+
+Use TanStack components for their respective domains:
+
+- **TanStack Query** - data fetching, caching, background updates
+- **TanStack Form** - form state management
+- **TanStack Table** - data tables and grids
+
+For existing projects using alternatives (React Hook Form, Formik, etc.):
+- If TanStack component offers significant advantages: Surface trade-offs and suggest migration
+- Otherwise: Work with established patterns
+
+## Data Fetching
+
+Choose the right tool for the job:
+
+- **Route loaders** - initial/SSR data, available before render
+- **TanStack Query** - client-side caching, background updates, real-time data
+- **Combination** - loaders for initial data + Query for client-side updates
+
+When using TanStack Query:
+- Prefetch in route loaders with `queryClient.prefetchQuery`
+- Use `isFetching` for background fetching indicators
+- Leverage caching and automatic query invalidation
+
+## Server-Side Rendering
+
+- Pre-fetch data for components via route loaders
+- Ensure data is available on initial render for SSR
+
+## Authentication
+
+- Use HTTP-only cookies for session tokens (not accessible via JavaScript)
+- Server-side: Always validate authorization for protected operations
+- Client-side: Cache auth state for UI purposes (show/hide elements) to avoid redundant API calls
+- Use middleware (`createMiddleware`) for auth checks on server functions
+
+## Avoid
+
+- Skipping server-side authorization checks for protected operations
+- Storing sensitive tokens in JavaScript-accessible storage
+- Mixing flat and nested route structures inconsistently
+- Accessing environment-specific resources without explicit context functions
+- Manual caching when TanStack Query would handle it
+- Not using route loaders for initial/SSR data

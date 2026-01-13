@@ -1,0 +1,28 @@
+---
+description: Generic framework conventions - consult docs, use official patterns
+globs: 
+alwaysApply: false
+---
+
+# Framework Conventions
+
+When working with any framework, follow official documentation and conventions.
+
+## Documentation
+
+- Navigate directly to the official documentation URL specified in the framework-specific rule
+- Verify patterns against current official docs before implementing
+- Do not rely on generic searches—use the provided documentation URLs
+- If no framework-specific rule provides a documentation URL: Ask user for the official docs location
+
+## Patterns
+
+- Use official CLI commands for scaffolding and setup
+- Prefer patterns shown in official examples
+- Follow established project patterns unless user requests migration
+
+## Avoid
+
+- Custom implementations when official utilities exist
+- Outdated patterns from older versions
+- Patterns that conflict with the framework's conventions

@@ -29,3 +29,9 @@ All Cursor rules must be composable—they should work together without conflict
 - ❌ Rules that require specific ordering or dependencies
 - ❌ Rules that assume exclusive control over a domain
 - ❌ Rules with overlapping responsibilities
+
+## Behaviors
+
+- Before finalizing any new rule: Verify it doesn't violate anti-patterns listed above
+- When adding cross-references between rules: Stop—this creates a dependency
+- When extracting shared content: Use `alwaysApply: true` instead of cross-references
