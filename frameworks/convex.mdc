@@ -1,0 +1,78 @@
+---
+description: Convex patterns and real-time backend conventions
+globs: 
+alwaysApply: false
+---
+
+# Convex
+
+Patterns for Convex real-time backend development.
+
+## Documentation
+
+- **Convex Docs**: https://docs.convex.dev/home
+- **Best Practices**: https://docs.convex.dev/understanding/best-practices
+- **Functions**: https://docs.convex.dev/functions
+- **Database**: https://docs.convex.dev/database
+- **File Storage**: https://docs.convex.dev/file-storage
+- **Authentication**: https://docs.convex.dev/auth
+
+## Function Types
+
+Use the appropriate function type for each operation:
+
+- **Queries** - read-only, cached, reactive, auto-retry
+- **Mutations** - write operations, transactional, auto-retry
+- **Actions** - side effects, external APIs, non-transactional
+
+Prefer queries and mutations over actions—they are cached and automatically retried.
+
+## Schema
+
+- Define schema in `convex/schema.ts` using `v` validators
+- Run `pnpx convex dev` to generate types in `convex/_generated/`
+- Use indexes for efficient lookups on frequently queried fields
+- Paginate large queries to avoid scanning excessive data
+
+## Argument Validation
+
+All public functions must validate arguments using Convex validators:
+
+- Use `v.string()`, `v.number()`, `v.boolean()`, `v.id("tableName")`
+- Use `v.optional()` for optional fields
+- Use `v.union()` for multiple allowed types
+- Reuse validators with `validator.pick()` and `paginationResultValidator()`
+
+## Helper Functions
+
+- Encapsulate shared logic (auth checks, business rules) in helper functions
+- Place helpers in `convex/` directory (e.g., `convex/userHelpers.ts`)
+- Avoid overusing `ctx.runQuery` and `ctx.runMutation`—use helpers instead
+
+## Authentication
+
+- Use `ctx.auth.getUserIdentity()` to get the authenticated user
+- Store user info in a `users` table with `tokenIdentifier` index
+- Always check authorization before protected operations
+- Throw errors for unauthenticated access to protected functions
+
+## File Storage
+
+- Store files in actions using `ctx.storage.store(blob)`
+- Save the returned `storageId` in your data model
+- Use internal mutations to persist storage IDs after action completes
+
+## Error Handling
+
+- Use `ConvexError` for user-facing errors with structured data
+- Implement error boundaries on the client for graceful degradation
+- Validate inputs early to fail fast with clear messages
+
+## Avoid
+
+- Calling actions directly from client—schedule via mutations instead
+- Skipping argument validation on public functions
+- Large unindexed queries without pagination
+- Using `ctx.runQuery`/`ctx.runMutation` when helper functions suffice
+- Storing sensitive data without proper authorization checks
+- Overusing actions when queries/mutations would work
