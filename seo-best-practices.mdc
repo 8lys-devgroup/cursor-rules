@@ -1,0 +1,138 @@
+---
+description: SEO best practices for web content, meta tags, and structured data
+globs:
+alwaysApply: false
+---
+
+# SEO Best Practices
+
+Universal SEO guidelines for AI-parsable, search-optimized web content.
+
+## When to Apply
+
+- Content/copy changes on public pages
+- Meta tags, Open Graph, or page titles
+- JSON-LD structured data
+- Sitemap or robots.txt changes
+- Location/service area pages
+
+## When NOT to Apply
+
+- Admin dashboards, auth pages, internal tools
+- Pages with `noindex` directive
+- Non-public routes (API, webhooks)
+- Backend-only code
+
+---
+
+## AI Search Optimization (LLM Parsability)
+
+Modern search includes AI assistants (ChatGPT, Perplexity, Gemini) that recommend services and answer questions by quoting web content.
+
+- First 100 words should answer: who, what, where, why
+- FAQ answers must be self-contained and directly quotable
+- Use natural language people actually search
+- Include location context naturally when relevant
+- Avoid jargon; prefer terms users would type or speak
+
+## Structured Data (Schema.org)
+
+### Guidelines
+
+- Use JSON-LD format (Google's preference)
+- Validate with [Google Rich Results Test](https://search.google.com/test/rich-results)
+- Use consistent `@id` URIs for entity linking across schemas
+- Don't add multiple `@type` unless genuinely needed
+- Avoid duplicate schema blocks; keep one primary entity per page
+- Only add schemas when content genuinely matches—no fake FAQs or reviews
+
+### Common Schemas
+
+| Schema | When to Use |
+|--------|-------------|
+| `Organization` / `LocalBusiness` | Business identity, contact info |
+| `FAQPage` | Only when genuine FAQ content exists |
+| `Service` / `Product` | Offerings with real descriptions |
+| `BreadcrumbList` | Navigation context |
+| `Review` / `AggregateRating` | Real reviews only |
+
+### Optional/Niche
+
+- `speakable` — voice search optimization; limited support, treat as experimental
+- `hreflang` — multi-locale sites only
+
+### Example
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://example.com/#business",
+  "name": "Business Name",
+  "url": "https://example.com",
+  "areaServed": [{ "@type": "City", "name": "City Name" }]
+}
+```
+
+## Meta Tags
+
+| Tag | Guidance |
+|-----|----------|
+| Title | ~50-60 chars, primary keyword early |
+| Description | ~150-160 chars, include CTA |
+| Canonical | Absolute URL, required on indexable pages only |
+| Robots | Explicit `index,follow` or `noindex,nofollow` when needed; frameworks may set sensible defaults |
+| Open Graph | `og:title`, `og:description`, `og:image` (1200x630, branded), `og:type`, `og:url` |
+| Language | `lang` attribute on `<html>` |
+
+Character counts are guidelines, not hard limits—prioritize clarity and intent.
+
+## URL Structure
+
+- Use lowercase, kebab-case (e.g., `/service-name` not `/Service_Name`)
+- Keep URLs short and descriptive; include primary keyword
+- Avoid deep nesting (>3 levels) where possible
+- Enforce trailing slash consistency (pick one style, stick to it)
+- Avoid query parameters for content variation; use clean paths
+
+## Content Hierarchy
+
+- One H1 per page containing primary keyword
+- Avoid multiple H1s from shared layouts or components
+- H2s for major sections (secondary keywords)
+- H3s for subsections
+- First paragraph should answer the page's core question
+
+## Image Optimization
+
+- **File Naming**: Descriptive filenames (`blue-widget.jpg`, not `IMG_123.jpg`)
+- **Formats**: Serve WebP/AVIF with fallbacks; avoid unoptimized PNGs for photos
+- **Dimensions**: Always set explicit `width` and `height` attributes to prevent CLS
+- **Alt Text**: Descriptive but concise; avoid keyword stuffing
+- **Lazy Loading**: Use `loading="lazy"` for below-fold images
+- **Responsive**: Provide `srcset` for multiple resolutions when practical
+
+## Technical SEO Checklist
+
+For public, indexable sites:
+
+- [ ] robots.txt allows crawling (do NOT block CSS/JS—Google needs them to render)
+- [ ] XML sitemap at /sitemap.xml
+- [ ] Canonical URLs prevent duplicate content
+- [ ] Images: alt text, explicit dimensions, optimized formats
+- [ ] Internal linking between related pages
+- [ ] Mobile-first responsive design
+- [ ] Core Web Vitals: LCP < 2.5s, CLS < 0.1, INP < 200ms
+
+## Local SEO
+
+**Only apply when local intent exists** (location-based services, physical businesses).
+
+Skip for SaaS, global products, or non-local services.
+
+When applicable:
+
+- NAP consistency (Name, Address, Phone) across all pages
+- Service area pages for each location served
+- Google Business Profile alignment
+- Location keywords in titles and content naturally
