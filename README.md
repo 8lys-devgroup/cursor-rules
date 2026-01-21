@@ -7,7 +7,7 @@ Shared Cursor IDE rules for 8lys projects.
 Add as a git submodule to your project:
 
 ```bash
-git submodule add https://github.com/8lys-devgroup/cursor-rules.git .cursor/rules
+git submodule add https://github.com/8lys-devgroup/cursor-rules.git .cursor/rules/shared
 ```
 
 To update rules in existing projects:
