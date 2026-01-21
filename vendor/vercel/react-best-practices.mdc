@@ -1,0 +1,707 @@
+---
+description: Vercel React Best Practices - performance optimization guidelines for React applications
+globs: "**/*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# Vercel React Best Practices
+
+Performance optimization guidelines from Vercel Engineering. 45 rules across 8 categories, prioritized by impact.
+
+**Source:** [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)
+
+## 1. Eliminating Waterfalls (CRITICAL)
+
+Waterfalls are the #1 performance killer. Each sequential await adds full network latency.
+
+### 1.1 Defer Await Until Needed
+
+Move `await` into branches where actually used.
+
+```tsx
+// ❌ Incorrect: blocks both branches
+async function handleRequest(userId: string, skipProcessing: boolean) {
+  const userData = await fetchUserData(userId)
+  if (skipProcessing) {
+    return { skipped: true }
+  }
+  return processUserData(userData)
+}
+
+// ✅ Correct: only blocks when needed
+async function handleRequest(userId: string, skipProcessing: boolean) {
+  if (skipProcessing) {
+    return { skipped: true }
+  }
+  const userData = await fetchUserData(userId)
+  return processUserData(userData)
+}
+```
+
+### 1.2 Promise.all() for Independent Operations
+
+Execute concurrent operations in parallel.
+
+```tsx
+// ❌ Incorrect: sequential, 3 round trips
+const user = await fetchUser()
+const posts = await fetchPosts()
+const comments = await fetchComments()
+
+// ✅ Correct: parallel, 1 round trip
+const [user, posts, comments] = await Promise.all([
+  fetchUser(),
+  fetchPosts(),
+  fetchComments()
+])
+```
+
+### 1.3 Start Promises Early in Server Functions
+
+Start independent operations immediately, await late.
+
+```tsx
+// ❌ Incorrect: config waits for auth
+export const getData = createServerFn().handler(async () => {
+  const session = await auth()
+  const config = await fetchConfig()
+  const data = await fetchData(session.user.id)
+  return { data, config }
+})
+
+// ✅ Correct: auth and config start immediately
+export const getData = createServerFn().handler(async () => {
+  const sessionPromise = auth()
+  const configPromise = fetchConfig()
+  
+  const session = await sessionPromise
+  const [config, data] = await Promise.all([
+    configPromise,
+    fetchData(session.user.id)
+  ])
+  return { data, config }
+})
+```
+
+### 1.4 Strategic Suspense Boundaries
+
+Use Suspense to show wrapper UI faster while data loads.
+
+```tsx
+// ❌ Incorrect: wrapper blocked by data
+async function Page() {
+  const data = await fetchData()
+  return (
+    <div>
+      <Sidebar />
+      <DataDisplay data={data} />
+      <Footer />
+    </div>
+  )
+}
+
+// ✅ Correct: wrapper shows immediately
+function Page() {
+  return (
+    <div>
+      <Sidebar />
+      <Suspense fallback={<Skeleton />}>
+        <DataDisplay />
+      </Suspense>
+      <Footer />
+    </div>
+  )
+}
+```
+
+## 2. Bundle Size Optimization (CRITICAL)
+
+Reducing initial bundle size improves Time to Interactive and LCP.
+
+### 2.1 Avoid Barrel File Imports
+
+Import directly from source files to avoid loading unused modules.
+
+```tsx
+// ❌ Incorrect: imports entire library (1,583 modules)
+import { Check, X, Menu } from 'lucide-react'
+
+// ✅ Correct: imports only what you need
+import Check from 'lucide-react/dist/esm/icons/check'
+import X from 'lucide-react/dist/esm/icons/x'
+import Menu from 'lucide-react/dist/esm/icons/menu'
+```
+
+Commonly affected: `lucide-react`, `@mui/material`, `react-icons`, `@radix-ui/*`, `lodash`, `date-fns`.
+
+### 2.2 Dynamic Imports for Heavy Components
+
+Use lazy loading for large components not needed on initial render.
+
+```tsx
+// ❌ Incorrect: Monaco bundles with main chunk (~300KB)
+import { MonacoEditor } from './monaco-editor'
+
+// ✅ Correct: Monaco loads on demand (TanStack Router)
+// Enable in vite.config.ts: autoCodeSplitting: true
+// Or use .lazy.tsx files with createLazyFileRoute
+```
+
+### 2.3 Defer Non-Critical Third-Party Libraries
+
+Load analytics/logging after hydration.
+
+```tsx
+// ❌ Incorrect: blocks initial bundle
+import { Analytics } from '@vercel/analytics/react'
+
+// ✅ Correct: loads after hydration
+import { lazy, Suspense } from 'react'
+const Analytics = lazy(() => 
+  import('@vercel/analytics/react').then(m => ({ default: m.Analytics }))
+)
+
+function Layout({ children }) {
+  return (
+    <>
+      {children}
+      <Suspense fallback={null}>
+        <Analytics />
+      </Suspense>
+    </>
+  )
+}
+```
+
+### 2.4 Preload Based on User Intent
+
+Preload heavy bundles on hover/focus.
+
+```tsx
+function EditorButton({ onClick }: { onClick: () => void }) {
+  const preload = () => {
+    if (typeof window !== 'undefined') {
+      void import('./monaco-editor')
+    }
+  }
+  
+  return (
+    <button
+      onMouseEnter={preload}
+      onFocus={preload}
+      onClick={onClick}
+    >
+      Open Editor
+    </button>
+  )
+}
+```
+
+## 3. Server-Side Performance (HIGH)
+
+### 3.1 Cross-Request LRU Caching
+
+Use LRU cache for data shared across requests.
+
+```tsx
+import { LRUCache } from 'lru-cache'
+
+const cache = new LRUCache<string, unknown>({
+  max: 1000,
+  ttl: 5 * 60 * 1000 // 5 minutes
+})
+
+export async function getUser(id: string) {
+  const cached = cache.get(id)
+  if (cached) return cached
+  
+  const user = await db.user.findUnique({ where: { id } })
+  cache.set(id, user)
+  return user
+}
+```
+
+### 3.2 Minimize Data Passed to Components
+
+Only pass fields that components actually use.
+
+```tsx
+// ❌ Incorrect: serializes all 50 fields
+export const Route = createFileRoute('/profile')({
+  loader: async () => {
+    const user = await fetchUser() // 50 fields
+    return { user }
+  },
+})
+
+// ✅ Correct: serializes only needed fields
+export const Route = createFileRoute('/profile')({
+  loader: async () => {
+    const user = await fetchUser()
+    return { 
+      name: user.name,
+      avatar: user.avatar 
+    }
+  },
+})
+```
+
+### 3.3 Parallel Data Fetching in Loaders
+
+Restructure to parallelize data fetching.
+
+```tsx
+export const Route = createFileRoute('/dashboard')({
+  loader: async ({ context }) => {
+    const [user, stats, notifications] = await Promise.all([
+      getUser({ data: { id: context.auth.userId } }),
+      getStats({ data: { id: context.auth.userId } }),
+      getNotifications({ data: { id: context.auth.userId } }),
+    ])
+    
+    return {
+      user: { name: user.name, avatar: user.avatar },
+      stats: { total: stats.total, trend: stats.trend },
+      unreadCount: notifications.filter(n => !n.read).length,
+    }
+  },
+})
+```
+
+### 3.4 React.cache() for Per-Request Deduplication
+
+> **Future:** Not yet available in TanStack Start v1 RC. Use route loaders which auto-dedupe.
+
+### 3.5 Non-Blocking Operations
+
+Schedule work after response is sent.
+
+```tsx
+// utils/background.server.ts
+import { logger } from '~/lib/observability'
+
+export function runAfterResponse<T>(
+  fn: () => Promise<T>,
+  context: { operation: string; metadata?: Record<string, unknown> }
+): void {
+  fn()
+    .then(() => {
+      logger.debug(`${context.operation} completed`, context.metadata)
+    })
+    .catch((error) => {
+      const isError = error instanceof Error
+      logger.error(`${context.operation} failed`, {
+        error: isError ? error.message : String(error),
+        stack: isError ? error.stack : undefined,
+        ...context.metadata,
+      })
+    })
+}
+```
+
+## 4. Client-Side Data Fetching (MEDIUM-HIGH)
+
+### 4.1 Use TanStack Query for Deduplication
+
+Automatic request deduplication, caching, and revalidation.
+
+```tsx
+import { useQuery } from '@tanstack/react-query'
+
+function UserList() {
+  const { data: users } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => getUsers(),
+  })
+}
+```
+
+### 4.2 Deduplicate Global Event Listeners
+
+Share listeners across component instances.
+
+```tsx
+// Module-level Map to track callbacks per key
+const keyCallbacks = new Map<string, Set<() => void>>()
+
+function useKeyboardShortcut(key: string, callback: () => void) {
+  useEffect(() => {
+    if (!keyCallbacks.has(key)) {
+      keyCallbacks.set(key, new Set())
+    }
+    keyCallbacks.get(key)!.add(callback)
+    
+    return () => {
+      const set = keyCallbacks.get(key)
+      if (set) {
+        set.delete(callback)
+        if (set.size === 0) keyCallbacks.delete(key)
+      }
+    }
+  }, [key, callback])
+}
+```
+
+### 4.3 Use Passive Event Listeners
+
+Add `{ passive: true }` to touch and wheel listeners.
+
+```tsx
+useEffect(() => {
+  const handleWheel = (e: WheelEvent) => console.log(e.deltaY)
+  
+  document.addEventListener('wheel', handleWheel, { passive: true })
+  return () => document.removeEventListener('wheel', handleWheel)
+}, [])
+```
+
+### 4.4 Version and Minimize localStorage Data
+
+Add version prefix, store minimal fields, wrap in try-catch.
+
+```tsx
+const VERSION = 'v2'
+
+function saveConfig(config: { theme: string; language: string }) {
+  try {
+    localStorage.setItem(`userConfig:${VERSION}`, JSON.stringify(config))
+  } catch {
+    // Throws in incognito, quota exceeded, or disabled
+  }
+}
+```
+
+## 5. Re-render Optimization (MEDIUM)
+
+### 5.1 Defer State Reads to Usage Point
+
+Don't subscribe to state only used in callbacks.
+
+```tsx
+// ❌ Incorrect: subscribes to all searchParams changes
+function ShareButton({ chatId }: { chatId: string }) {
+  const searchParams = useSearchParams()
+  const handleShare = () => {
+    const ref = searchParams.get('ref')
+    shareChat(chatId, { ref })
+  }
+  return <button onClick={handleShare}>Share</button>
+}
+
+// ✅ Correct: reads on demand
+function ShareButton({ chatId }: { chatId: string }) {
+  const handleShare = () => {
+    const params = new URLSearchParams(window.location.search)
+    const ref = params.get('ref')
+    shareChat(chatId, { ref })
+  }
+  return <button onClick={handleShare}>Share</button>
+}
+```
+
+### 5.2 Use Functional setState Updates
+
+Prevents stale closures and creates stable callbacks.
+
+```tsx
+// ❌ Incorrect: requires items dependency
+const addItems = useCallback((newItems: Item[]) => {
+  setItems([...items, ...newItems])
+}, [items])
+
+// ✅ Correct: stable callback, no stale closures
+const addItems = useCallback((newItems: Item[]) => {
+  setItems(curr => [...curr, ...newItems])
+}, [])
+```
+
+### 5.3 Use Lazy State Initialization
+
+Pass function to useState for expensive initial values.
+
+```tsx
+// ❌ Incorrect: runs on every render
+const [settings, setSettings] = useState(
+  JSON.parse(localStorage.getItem('settings') || '{}')
+)
+
+// ✅ Correct: runs only once
+const [settings, setSettings] = useState(() => {
+  const stored = localStorage.getItem('settings')
+  return stored ? JSON.parse(stored) : {}
+})
+```
+
+### 5.4 Narrow Effect Dependencies
+
+Use primitive dependencies instead of objects.
+
+```tsx
+// ❌ Incorrect: re-runs on any user field change
+useEffect(() => {
+  console.log(user.id)
+}, [user])
+
+// ✅ Correct: re-runs only when id changes
+useEffect(() => {
+  console.log(user.id)
+}, [user.id])
+```
+
+### 5.5 Subscribe to Derived State
+
+Reduce re-render frequency with derived booleans.
+
+```tsx
+// ❌ Incorrect: re-renders on every pixel change
+function Sidebar() {
+  const width = useWindowWidth()
+  const isMobile = width < 768
+  return <nav className={isMobile ? 'mobile' : 'desktop'} />
+}
+
+// ✅ Correct: re-renders only when boolean changes
+function Sidebar() {
+  const isMobile = useMediaQuery('(max-width: 767px)')
+  return <nav className={isMobile ? 'mobile' : 'desktop'} />
+}
+```
+
+### 5.6 Use Transitions for Non-Urgent Updates
+
+```tsx
+import { startTransition } from 'react'
+
+function ScrollTracker() {
+  const [scrollY, setScrollY] = useState(0)
+  
+  useEffect(() => {
+    const handler = () => {
+      startTransition(() => setScrollY(window.scrollY))
+    }
+    window.addEventListener('scroll', handler, { passive: true })
+    return () => window.removeEventListener('scroll', handler)
+  }, [])
+}
+```
+
+## 6. Rendering Performance (MEDIUM)
+
+### 6.1 Animate SVG Wrapper Instead of SVG Element
+
+Browsers don't have hardware acceleration for CSS animations on SVG elements.
+
+```tsx
+// ❌ Incorrect: no hardware acceleration
+<svg className="animate-spin">...</svg>
+
+// ✅ Correct: hardware accelerated
+<div className="animate-spin">
+  <svg>...</svg>
+</div>
+```
+
+### 6.2 CSS content-visibility for Long Lists
+
+```css
+.message-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 80px;
+}
+```
+
+### 6.3 Hoist Static JSX Elements
+
+Extract static JSX outside components.
+
+```tsx
+// ❌ Incorrect: recreates element every render
+function Container() {
+  return loading && <div className="animate-pulse h-20 bg-gray-200" />
+}
+
+// ✅ Correct: reuses same element
+const skeleton = <div className="animate-pulse h-20 bg-gray-200" />
+
+function Container() {
+  return loading && skeleton
+}
+```
+
+### 6.4 Use Explicit Conditional Rendering
+
+Use ternary instead of `&&` when condition can be falsy.
+
+```tsx
+// ❌ Incorrect: renders "0" when count is 0
+{count && <Badge>{count}</Badge>}
+
+// ✅ Correct: renders nothing when count is 0
+{count > 0 ? <Badge>{count}</Badge> : null}
+```
+
+## 7. JavaScript Performance (LOW-MEDIUM)
+
+### 7.1 Build Index Maps for Repeated Lookups
+
+```tsx
+// ❌ Incorrect: O(n) per lookup
+orders.map(order => ({
+  ...order,
+  user: users.find(u => u.id === order.userId)
+}))
+
+// ✅ Correct: O(1) per lookup
+const userById = new Map(users.map(u => [u.id, u]))
+orders.map(order => ({
+  ...order,
+  user: userById.get(order.userId)
+}))
+```
+
+### 7.2 Cache Property Access in Loops
+
+```tsx
+// ❌ Incorrect: 3 lookups × N iterations
+for (let i = 0; i < arr.length; i++) {
+  process(obj.config.settings.value)
+}
+
+// ✅ Correct: 1 lookup total
+const value = obj.config.settings.value
+const len = arr.length
+for (let i = 0; i < len; i++) {
+  process(value)
+}
+```
+
+### 7.3 Use Set/Map for O(1) Lookups
+
+```tsx
+// ❌ Incorrect: O(n) per check
+items.filter(item => allowedIds.includes(item.id))
+
+// ✅ Correct: O(1) per check
+const allowed = new Set(allowedIds)
+items.filter(item => allowed.has(item.id))
+```
+
+### 7.4 Combine Multiple Array Iterations
+
+```tsx
+// ❌ Incorrect: 3 iterations
+const admins = users.filter(u => u.isAdmin)
+const testers = users.filter(u => u.isTester)
+const inactive = users.filter(u => !u.isActive)
+
+// ✅ Correct: 1 iteration
+const admins: User[] = []
+const testers: User[] = []
+const inactive: User[] = []
+
+for (const user of users) {
+  if (user.isAdmin) admins.push(user)
+  if (user.isTester) testers.push(user)
+  if (!user.isActive) inactive.push(user)
+}
+```
+
+### 7.5 Early Return from Functions
+
+```tsx
+// ❌ Incorrect: processes all items after finding error
+function validateUsers(users: User[]) {
+  let hasError = false
+  for (const user of users) {
+    if (!user.email) hasError = true
+  }
+  return hasError ? { valid: false } : { valid: true }
+}
+
+// ✅ Correct: returns immediately on first error
+function validateUsers(users: User[]) {
+  for (const user of users) {
+    if (!user.email) return { valid: false, error: 'Email required' }
+  }
+  return { valid: true }
+}
+```
+
+### 7.6 Use toSorted() Instead of sort()
+
+Prevents mutation bugs with React state.
+
+```tsx
+// ❌ Incorrect: mutates original array
+const sorted = users.sort((a, b) => a.name.localeCompare(b.name))
+
+// ✅ Correct: creates new array
+const sorted = users.toSorted((a, b) => a.name.localeCompare(b.name))
+```
+
+### 7.7 Early Length Check for Array Comparisons
+
+```tsx
+function hasChanges(current: string[], original: string[]) {
+  if (current.length !== original.length) return true
+  
+  const currentSorted = current.toSorted()
+  const originalSorted = original.toSorted()
+  
+  for (let i = 0; i < currentSorted.length; i++) {
+    if (currentSorted[i] !== originalSorted[i]) return true
+  }
+  return false
+}
+```
+
+## 8. Advanced Patterns (LOW)
+
+### 8.1 Store Event Handlers in Refs
+
+For effects that shouldn't re-subscribe on callback changes.
+
+```tsx
+import { useEffectEvent } from 'react'
+
+function useWindowEvent(event: string, handler: () => void) {
+  const onEvent = useEffectEvent(handler)
+  
+  useEffect(() => {
+    window.addEventListener(event, onEvent)
+    return () => window.removeEventListener(event, onEvent)
+  }, [event])
+}
+```
+
+### 8.2 useLatest for Stable Callback Refs
+
+Access latest values without adding to dependency arrays.
+
+```tsx
+function useLatest<T>(value: T) {
+  const ref = useRef(value)
+  useEffect(() => {
+    ref.current = value
+  }, [value])
+  return ref
+}
+
+function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
+  const [query, setQuery] = useState('')
+  const onSearchRef = useLatest(onSearch)
+  
+  useEffect(() => {
+    const timeout = setTimeout(() => onSearchRef.current(query), 300)
+    return () => clearTimeout(timeout)
+  }, [query])
+}
+```
+
+---
+
+## References
+
+- [Vercel React Best Practices](https://vercel.com/blog/introducing-react-best-practices)
+- [TanStack Start Docs](https://tanstack.com/start/latest)
+- [TanStack Router Code Splitting](https://tanstack.com/router/latest/docs/framework/react/guide/code-splitting)
