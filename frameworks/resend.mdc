@@ -1,0 +1,85 @@
+---
+description: Resend email API patterns and conventions
+globs: 
+alwaysApply: false
+---
+
+# Resend
+
+Patterns for Resend email API and React Email templates.
+
+## Documentation
+
+- **Resend Docs**: https://resend.com/docs
+- **API Reference**: https://resend.com/docs/api-reference
+- **React Email**: https://react.email/docs/introduction
+- **Node.js SDK**: https://resend.com/docs/sdks/nodejs
+
+## Setup
+
+- Install: `pnpm add resend @react-email/components`
+- Env var: `RESEND_API_KEY` (never commit, server-side only)
+- Place email templates in `src/emails/` (`.tsx` files)
+- Verify sending domain in Resend dashboard
+- Use separate API keys per environment (dev/staging/prod)
+
+## Email Template Example
+
+```tsx
+// src/emails/WelcomeEmail.tsx
+import { Html, Head, Body, Container, Text } from '@react-email/components'
+
+interface WelcomeEmailProps {
+  name: string
+}
+
+export function WelcomeEmail({ name }: WelcomeEmailProps) {
+  return (
+    <Html>
+      <Head />
+      <Body>
+        <Container>
+          <Text>Welcome, {name}!</Text>
+        </Container>
+      </Body>
+    </Html>
+  )
+}
+```
+
+## Sending Pattern
+
+```tsx
+// In a server function (e.g., createServerFn)
+import { Resend } from 'resend'
+import { WelcomeEmail } from '../emails/WelcomeEmail'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+const { data, error } = await resend.emails.send({
+  from: 'App Name <noreply@yourdomain.com>',
+  to: 'user@example.com',
+  subject: 'Welcome',
+  react: <WelcomeEmail name="User" />,
+  headers: { 'Idempotency-Key': 'welcome-user-123' }, // optional: prevent duplicates on retry
+})
+```
+
+- Send from server functions only (`createServerFn` in TanStack Start)
+- Use friendly from format: `"Name <email@domain.com>"`
+- Plain text auto-generated from HTML if `text` omitted
+- Use `html`/`text` only for simple system emails without branding
+
+## Error Handling
+
+- Check `error` from response before assuming success
+- Handle rate limits (429) with exponential backoff
+- Retry transient errors (5xx) with backoff
+- Log errors with request context for debugging
+
+## Avoid
+
+- Client-side email sending (exposes API key)
+- Hardcoded API keys in source code
+- Sending from unverified domains
+- Using `html` string when React Email components would work
