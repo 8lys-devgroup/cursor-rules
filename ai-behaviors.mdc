@@ -32,3 +32,14 @@ Consistent patterns for AI interaction with the developer.
 - Analyze codebase to determine established patterns before suggesting changes
 - Work with established patterns unless user requests migration
 - Flag inconsistencies to user rather than silently mixing approaches
+
+## Before Implementing Complex Patterns
+
+When a solution involves:
+- Escape-hatch APIs (dangerouslySetInnerHTML, @ts-ignore, etc.)
+- Significant complexity for marginal gains
+- Patterns that feel like workarounds
+
+**Stop and rethink**: Escape hatches signal wrong approach. Find the proper solution instead of asking permission to use a workaround.
+
+If genuinely blocked by external constraints, surface as a design constraint — not as a workaround to approve.

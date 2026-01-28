@@ -1,0 +1,44 @@
+---
+description: Code quality gates - escape hatches signal wrong approach
+globs: 
+alwaysApply: true
+---
+
+# Code Quality
+
+Top 1% code doesn't accumulate technical debt by choice.
+
+## Escape Hatch APIs
+
+These are signals that your approach is wrong, not tools to reach for:
+
+- `dangerouslySetInnerHTML`
+- `// @ts-ignore` / `// @ts-expect-error`
+- `any` type
+- `eval()` / `new Function()`
+- `!important` in CSS
+- Inline styles for non-dynamic values
+
+**When you find yourself reaching for these:**
+
+1. Stop — you are solving the wrong problem or using the wrong approach
+2. Step back and identify the proper solution
+3. If genuinely blocked (third-party limitation, legacy constraint), surface this as a design constraint to discuss — do not implement a workaround
+
+Escape hatches are technical debt. Do not create technical debt to solve problems that have proper solutions.
+
+## Implementation Quality
+
+- Prefer solutions that don't require ongoing maintenance
+- Avoid patterns that duplicate source of truth (handwritten critical CSS that must sync with Tailwind)
+- If a solution feels like a hack, it is — find the proper approach
+- When uncertain about approach quality, ask before implementing rather than after
+
+## Code Smells to Surface
+
+When encountering these patterns, stop and rethink:
+
+- Magic strings that duplicate values defined elsewhere
+- Build-time solutions implemented at runtime
+- Framework escape hatches used for common use cases
+- Patterns that would surprise the next developer

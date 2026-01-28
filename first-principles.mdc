@@ -46,3 +46,18 @@ Approach all architecture and problem-solving from fundamentals, not borrowed co
 - Apply first-principles analysis before adopting external recommendations
 - Ask: "What is the fundamental requirement?" before accepting optimization advice
 - Security and correctness take precedence over performance optimizations
+
+## Performance Optimization
+
+Performance tools (Lighthouse, PageSpeed, WebPageTest) are diagnostic, not prescriptive.
+
+- **Validate the problem first**: Does the flagged issue actually impact user experience?
+- **Identify root cause**: "Render-blocking CSS" may mean "slow external font CDN," not "CSS is too big"
+- **Question theoretical savings**: "Est savings of X ms" assumes ideal conditions; measure real impact
+- **Prefer simple solutions**: Self-hosting > CDN optimization > complex deferral patterns
+- **Accept reasonable blocking**: Small, fast-loading CSS is fine to be render-blocking; avoiding FOUC is valid UX
+
+Before implementing performance "fixes":
+1. What is the actual user-facing problem?
+2. Is this the root cause or a symptom?
+3. Is there a simpler solution?
