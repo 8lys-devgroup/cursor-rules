@@ -24,6 +24,7 @@ Use the appropriate function type for each operation:
 - **Queries** - read-only, cached, reactive, auto-retry
 - **Mutations** - write operations, transactional, auto-retry
 - **Actions** - side effects, external APIs, non-transactional
+- Use `internalQuery`/`internalMutation`/`internalAction` for private functions (not exposed to client)
 
 Prefer queries and mutations over actions—they are cached and automatically retried.
 
@@ -42,12 +43,14 @@ All public functions must validate arguments using Convex validators:
 - Use `v.optional()` for optional fields
 - Use `v.union()` for multiple allowed types
 - Reuse validators with `validator.pick()` and `paginationResultValidator()`
+- Always include `returns` validator; use `returns: v.null()` for void functions
 
 ## Helper Functions
 
 - Encapsulate shared logic (auth checks, business rules) in helper functions
 - Place helpers in `convex/` directory (e.g., `convex/userHelpers.ts`)
-- Avoid overusing `ctx.runQuery` and `ctx.runMutation`—use helpers instead
+- From actions: use `ctx.runQuery`/`ctx.runMutation` (required—actions can't access db directly)
+- From queries/mutations: prefer helper functions over `ctx.runQuery`/`ctx.runMutation` to avoid unnecessary function call overhead
 
 ## Authentication
 
@@ -73,6 +76,6 @@ All public functions must validate arguments using Convex validators:
 - Calling actions directly from client—schedule via mutations instead
 - Skipping argument validation on public functions
 - Large unindexed queries without pagination
-- Using `ctx.runQuery`/`ctx.runMutation` when helper functions suffice
+- Using `ctx.runQuery`/`ctx.runMutation` from queries/mutations when helper functions suffice
 - Storing sensitive data without proper authorization checks
 - Overusing actions when queries/mutations would work
