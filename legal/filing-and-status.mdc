@@ -7,19 +7,19 @@ alwaysApply: false
 # Filing + Status + Index Rules (docs/legal)
 
 ## Canonical structure (locked)
-- `docs/legal/Drafts/` contains **draft markdown** documents.
-- `docs/legal/Executed/` contains **executed PDFs only** (DocuSign output). No executed markdown counterpart.
-- `docs/legal/Archive/` contains superseded/withdrawn/replaced items.
+- `docs/legal/drafts/` contains **draft markdown** documents.
+- `docs/legal/executed/` contains **executed PDFs only** (DocuSign output). No executed markdown counterpart.
+- `docs/legal/archive/` contains superseded/withdrawn/replaced items.
 
 ## Default placement
-- New documents you draft: `docs/legal/Drafts/...`
-- Only place something under `docs/legal/Executed/...` when the user explicitly confirms it is executed/signed and you have the PDF.
+- New documents you draft: `docs/legal/drafts/...`
+- Only place something under `docs/legal/executed/...` when the user explicitly confirms it is executed/signed and you have the PDF.
 
 ## Executed PDF layout (locked)
 Executed PDFs must be stored inside a per-document folder:
-- `docs/legal/Executed/SOWs/SOW-####/SOW-#### - Statement of Work - [short-title].pdf`
-- `docs/legal/Executed/Change_Orders/CO-####/CO-#### - Change Order - [short-title].pdf`
-- `docs/legal/Executed/Acceptance/AC-####/AC-#### - Acceptance Certificate - SOW-#### - [deliverable-or-milestone].pdf`
+- `docs/legal/executed/sows/SOW-####/SOW-#### - Statement of Work - [short-title].pdf`
+- `docs/legal/executed/change-orders/CO-####/CO-#### - Change Order - [short-title].pdf`
+- `docs/legal/executed/acceptance/AC-####/AC-#### - Acceptance Certificate - SOW-#### - [deliverable-or-milestone].pdf`
 
 ## Index file (required)
 `docs/legal/00-Index.md` is the authoritative index.
@@ -34,8 +34,8 @@ Update `docs/legal/00-Index.md` whenever you create a new doc folder (SOW/CO/AC/
 - MSA/Exhibits: `Name | Status | Date | Link`
 
 ### Link target rule (locked)
-- If an executed PDF exists for that ID, the **Link** must point to the PDF in `docs/legal/Executed/...`.
-- Otherwise, the **Link** must point to the draft markdown file in `docs/legal/Drafts/...`.
+- If an executed PDF exists for that ID, the **Link** must point to the PDF in `docs/legal/executed/...`.
+- Otherwise, the **Link** must point to the draft markdown file in `docs/legal/drafts/...`.
 
 ## Plan source (locked)
 When drafting a SOW/CO, the plan source must be a file under `.cursor/plans/`.

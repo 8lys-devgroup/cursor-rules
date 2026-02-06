@@ -21,7 +21,7 @@ Use: `docs/legal/contracts/Acceptance Certificate Template.md`
 - Do not assert “Payment Received occurred” unless user explicitly confirmed; keep template boilerplate language intact.
 
 ## Output location
-- `docs/legal/Drafts/Acceptance/AC-####/AC-#### - Acceptance Certificate - SOW-#### - [deliverable-or-milestone].md`
+- `docs/legal/drafts/acceptance/AC-####/AC-#### - Acceptance Certificate - SOW-#### - [deliverable-or-milestone].md`
 
 ## Tracking table (required)
 At top of the AC draft, include a Tracking table with:

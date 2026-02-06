@@ -13,13 +13,13 @@ alwaysApply: false
 
 ## Directories (locked)
 - Drafts:
-  - `docs/legal/Drafts/SOWs/`
-  - `docs/legal/Drafts/Change_Orders/`
-  - `docs/legal/Drafts/Acceptance/`
+  - `docs/legal/drafts/sows/`
+  - `docs/legal/drafts/change-orders/`
+  - `docs/legal/drafts/acceptance/`
 - Executed:
-  - `docs/legal/Executed/SOWs/`
-  - `docs/legal/Executed/Change_Orders/`
-  - `docs/legal/Executed/Acceptance/`
+  - `docs/legal/executed/sows/`
+  - `docs/legal/executed/change-orders/`
+  - `docs/legal/executed/acceptance/`
 
 ## Algorithm (collision-safe, no gap reuse)
 When creating a new document:
@@ -38,7 +38,7 @@ When creating a new document:
 
 ## Per-document folder rule (required)
 Every new document must be created inside its own folder:
-- `docs/legal/Drafts/SOWs/SOW-####/`
-- `docs/legal/Drafts/Change_Orders/CO-####/`
-- `docs/legal/Drafts/Acceptance/AC-####/`
+- `docs/legal/drafts/sows/SOW-####/`
+- `docs/legal/drafts/change-orders/CO-####/`
+- `docs/legal/drafts/acceptance/AC-####/`
 

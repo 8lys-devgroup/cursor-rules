@@ -9,7 +9,7 @@ alwaysApply: false
 ## Preconditions (hard stop)
 - Do not draft a SOW unless you can cite a plan source under `.cursor/plans/`.
 - Use auto-numbering rules in `auto-numbering.mdc`.
-- Draft SOW output location is `docs/legal/Drafts/SOWs/SOW-####/`.
+- Draft SOW output location is `docs/legal/drafts/sows/SOW-####/`.
 
 ## Template selection
 Select exactly one:

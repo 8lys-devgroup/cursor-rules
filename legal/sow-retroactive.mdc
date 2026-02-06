@@ -83,7 +83,7 @@ Then draft the SOW using existing rules:
 - `filing-and-status.mdc` (draft placement + index update rules)
 
 SOW output location:
-- `docs/legal/Drafts/SOWs/SOW-####/SOW-#### - Statement of Work - [short-title].md`
+- `docs/legal/drafts/sows/SOW-####/SOW-#### - Statement of Work - [short-title].md`
 
 Tracking table requirement:
 - SOW Tracking.Source must cite `.cursor/plans/...` (the retroactive plan).

@@ -1,0 +1,28 @@
+---
+description: Project-wide naming conventions for directories and files
+alwaysApply: true
+---
+
+# Naming Convention
+
+## Directories (locked)
+
+All directories use **lowercase kebab-case**. No exceptions.
+
+- ✅ `src/components/`, `docs/legal/drafts/`, `docs/legal/executed/change-orders/`
+- ❌ `Drafts/`, `Change_Orders/`, `MSAs/`
+
+### Per-document ID folders
+
+Per-document folders under `docs/legal/` that are named after a document ID retain uppercase in the ID portion only:
+
+- ✅ `docs/legal/drafts/sows/SOW-0001/`
+- ✅ `docs/legal/drafts/acceptance/AC-0001/`
+- ❌ `docs/legal/drafts/SOWs/SOW-0001/`
+
+## Files
+
+- **Code files** (`.ts`, `.tsx`, `.js`, `.css`, etc.): lowercase kebab-case — `server-functions.ts`, `card.tsx`
+  - Exception: PascalCase component files are acceptable when matching the exported component name — `Hero.tsx`, `ContactFormEmail.tsx`
+- **Legal documents** (`.md` under `docs/legal/`): Title Case with spaces — `SOW-0001 - Statement of Work - RAD X Website.md`
+- **Config/tooling** (`.json`, `.mjs`, etc.): lowercase kebab-case — `package.json`, `generate-image-variants.mjs`

@@ -41,7 +41,7 @@ Required outcomes:
 - Assumptions/dependencies must be stated.
 
 ## Output location
-- `docs/legal/Drafts/Change_Orders/CO-####/CO-#### - Change Order - [short-title].md`
+- `docs/legal/drafts/change-orders/CO-####/CO-#### - Change Order - [short-title].md`
 
 ## Tracking table (required)
 At top of the CO draft, include a Tracking table with:
