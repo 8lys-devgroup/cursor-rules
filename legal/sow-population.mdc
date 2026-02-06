@@ -1,0 +1,51 @@
+---
+description: Convert a plan (.cursor/plans) into a SOW draft (Fixed Bid / T&M / Maintenance) aligned to the templates.
+globs: docs/legal/**/*.{md,mdx}
+alwaysApply: false
+---
+
+# SOW Population Rules (Plan → SOW)
+
+## Preconditions (hard stop)
+- Do not draft a SOW unless you can cite a plan source under `.cursor/plans/`.
+- Use auto-numbering rules in `auto-numbering.mdc`.
+- Draft SOW output location is `docs/legal/Drafts/SOWs/SOW-####/`.
+
+## Template selection
+Select exactly one:
+- Fixed Bid → `docs/legal/contracts/SOW Template - Fixed Bid.md`
+- Time & Materials → `docs/legal/contracts/SOW Template - Time and Materials.md`
+- Maintenance & Support → `docs/legal/contracts/SOW Template - Maintenance and Support.md`
+
+If the plan does not clearly indicate which model applies, stop and ask: fixed bid vs T&M vs maintenance.
+
+## Required extracted plan fields (must be present or left as placeholders)
+- Parties/dates: `[CLIENT LEGAL NAME]`, `[MSA DATE]`, `[DATE]` (effective date)
+- Project overview: purpose/objectives/constraints
+- Deliverables list `D1..Dn`: name + description
+- Acceptance criteria per deliverable: testable/measurable
+- In-scope / out-of-scope bullets
+- Assumptions (and consequence if assumption fails)
+- Fees model details (amounts/rates/retainer/NTE) and payment triggers
+- Client responsibilities + deadlines
+- Dependencies / third-party materials (provider, cost, responsible party)
+
+## Draft formatting rules
+- Preserve template structure and headings.
+- Use placeholders in `[BRACKETS]` where unknown.
+- Add `[TODO: ...]` only for items that must be resolved before execution/signature.
+
+## Deliverables + acceptance criteria requirements
+- Fixed Bid SOW: fill the Deliverables table and include **specific acceptance criteria** per deliverable (measurable).
+- T&M SOW: if using the Deliverables table, keep it “anticipated outputs” unless the plan explicitly treats them as binding commitments.
+- Maintenance SOW: define what counts as “minor enhancement” by setting `[X] hours` and keep excluded categories explicit.
+
+## Tracking table (required)
+At top of the SOW draft, include a Tracking table with:
+- DocID (the SOW ID)
+- Status: Draft
+- Related IDs: (none initially)
+- Date
+- Summary
+- Source: `.cursor/plans/...`
+

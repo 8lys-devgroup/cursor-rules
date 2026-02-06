@@ -1,0 +1,44 @@
+---
+description: Deterministic ID assignment (SOW/CO/AC) and per-document folder rules for docs/legal.
+globs: docs/legal/**/*.{md,mdx}
+alwaysApply: false
+---
+
+# Auto-numbering (SOW / Change Order / Acceptance Certificate)
+
+## ID formats (locked)
+- SOW: `SOW-0001`, `SOW-0002`, …
+- Change Order: `CO-0001`, `CO-0002`, …
+- Acceptance Certificate: `AC-0001`, `AC-0002`, …
+
+## Directories (locked)
+- Drafts:
+  - `docs/legal/Drafts/SOWs/`
+  - `docs/legal/Drafts/Change_Orders/`
+  - `docs/legal/Drafts/Acceptance/`
+- Executed:
+  - `docs/legal/Executed/SOWs/`
+  - `docs/legal/Executed/Change_Orders/`
+  - `docs/legal/Executed/Acceptance/`
+
+## Algorithm (collision-safe, no gap reuse)
+When creating a new document:
+
+1. Ensure the Draft and Executed directories for that doc type exist (create if missing).
+2. List subfolders across **both** Drafts and Executed matching:
+   - SOW: `SOW-\\d{4}`
+   - CO: `CO-\\d{4}`
+   - AC: `AC-\\d{4}`
+3. Determine the next numeric suffix:
+   - If none exist: `0001`
+   - Else: `(max + 1)` across the union
+4. If the computed folder already exists, increment until a free number is found.
+5. Never reuse gaps.
+6. If you cannot list directories, **stop and request permission** to list the relevant folder. Do not ask the user to pick a number.
+
+## Per-document folder rule (required)
+Every new document must be created inside its own folder:
+- `docs/legal/Drafts/SOWs/SOW-####/`
+- `docs/legal/Drafts/Change_Orders/CO-####/`
+- `docs/legal/Drafts/Acceptance/AC-####/`
+

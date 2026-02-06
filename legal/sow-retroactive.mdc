@@ -1,0 +1,113 @@
+---
+description: Draft a retroactive SOW from end-state at HEAD using code-only evidence + deep scan of .cursor/plans, with git used only as audit evidence and a 3-pass completeness audit loop.
+globs: docs/legal/**/*.{md,mdx}
+alwaysApply: false
+---
+
+# Retroactive SOW Rule (End-State SOW)
+
+## Goal
+Draft a retroactive SOW **after** work is already completed, reflecting the **final end-state at HEAD**.
+
+Hard constraints:
+- SOW must be comprehensive (do not miss implemented functionality).
+- SOW must not include abandoned pivots/reverted directions.
+
+## Evidence sources (required)
+Use all three:
+- **HEAD code** (source of truth for what exists)
+- **All plans in `.cursor/plans/`** (intent paraphrase; deep-read all every time)
+- **Git history** (audit evidence only; detect reverts/removals/pivots)
+
+Rule: plans can inform naming/description/grouping, but **a deliverable is in-scope only if evidenced at HEAD** (code-only evidence).
+
+## Definition: “evidenced at HEAD” (explicit)
+Evidenced at HEAD = **code-only evidence**, including backend-only functionality.
+
+Examples of code-only evidence:
+- routes/pages/controllers/handlers
+- service/business-logic modules
+- API endpoints/webhooks
+- background jobs/workers
+- DB schema/models/migrations supporting a capability
+- integration modules (payments/auth/email/etc.)
+
+Exclude from evidence unless user explicitly wants included:
+- tests/fixtures/mocks
+- internal tooling/dev scripts
+- commented-out/disabled code
+- experimental/spike directories clearly labeled as such
+
+If ambiguous whether a module is production capability vs internal tooling, treat as uncertain and resolve via the audit stop-condition.
+
+## Workflow (required)
+
+### Step 0 — Plan source in `.cursor/plans/` (required)
+Before drafting the SOW:
+- Select an existing plan in `.cursor/plans/` OR create a new retroactive plan file:
+  - `.cursor/plans/PLAN-YYYYMMDD-Retroactive-SOW-[topic].plan.md`
+
+### Step 1 — Build End-State Inventory (HEAD-only)
+In the retroactive plan, create an **End-State Inventory** enumerating what exists now (HEAD), in user-facing terms.
+
+Inventory must cover (as applicable):
+- user-visible pages/flows
+- admin/ops pages/flows
+- integrations
+- data objects/content types + key CRUD operations
+- roles/permissions
+- settings/configuration capabilities
+- backend-only services/capabilities evidenced at HEAD
+
+Do not infer features not evidenced at HEAD.
+
+### Step 2 — Convert inventory → deliverables + acceptance criteria
+For each inventory item, create a deliverable `D1..Dn` with:
+- name
+- short description
+- acceptance criteria (testable/measurable against end-state)
+
+If acceptance criteria cannot be made testable/measurable from evidence, add a targeted `[TODO: confirm acceptance criteria]`.
+
+### Step 3 — Detect removed/pivoted work (plans + git) and record as not delivered
+Use plans + git history to find work that was contemplated or partially built but is **not present at HEAD**.
+
+Rules:
+- Only include items under **Out-of-Scope / Not Delivered** if confidently identified.
+- If uncertain delivered vs removed, do not include as deliverable; add `[TODO: clarify delivered vs removed]` and resolve via audit stop-condition.
+
+### Step 4 — Draft the SOW from the retroactive plan
+Then draft the SOW using existing rules:
+- `auto-numbering.mdc` (assign SOW ID)
+- `sow-population.mdc` (populate the correct SOW template)
+- `filing-and-status.mdc` (draft placement + index update rules)
+
+SOW output location:
+- `docs/legal/Drafts/SOWs/SOW-####/SOW-#### - Statement of Work - [short-title].md`
+
+Tracking table requirement:
+- SOW Tracking.Source must cite `.cursor/plans/...` (the retroactive plan).
+
+## 3-pass audit loop (required)
+Perform exactly 3 audit passes, revising between passes.
+
+Each pass compares:
+1. End-State Inventory (HEAD)
+2. Plan Deliverables (`D1..Dn`)
+3. SOW sections (Scope, Deliverables, Acceptance)
+
+Audit checks (each pass):
+- **No missing end-state**: every inventory item maps to exactly one deliverable and appears in SOW deliverables.
+- **No paraphrase loss**: if a deliverable is too vague and collapses distinct features, split it.
+- **No phantom scope**: every SOW deliverable maps back to an inventory item evidenced at HEAD (code-only).
+- **No pivot leakage**: no deliverable exists solely because a plan mentioned it; it must be evidenced at HEAD.
+- **Acceptance completeness**: every deliverable has acceptance criteria (or a targeted TODO).
+
+Loop:
+- Pass 1 audit → revise plan/SOW
+- Pass 2 audit → revise plan/SOW
+- Pass 3 audit → revise plan/SOW
+
+Stop-condition (locked):
+- If after pass 3 critical unknowns remain that prevent a completeness claim, **stop and ask targeted questions**. Do not mark the SOW as ready.
+

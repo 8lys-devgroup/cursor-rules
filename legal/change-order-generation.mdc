@@ -1,0 +1,54 @@
+---
+description: Decide New SOW vs Change Order, and draft Change Orders aligned to the template with concrete deltas.
+globs: docs/legal/**/*.{md,mdx}
+alwaysApply: false
+---
+
+# Change Order Generation Rules (and New SOW vs CO)
+
+## Preconditions
+- Use plan source under `.cursor/plans/` (required).
+- Determine controlling executed SOW using the plan’s Controlling SOW selection rule.
+
+## Decision rule: New SOW vs Change Order
+If no controlling executed SOW exists → **new SOW** (do not draft a CO).
+
+If a controlling executed SOW exists:
+- Draft a **CO** when the request modifies the existing SOW’s deal terms for that same scope, including changes to:
+  - deliverables/specs/acceptance criteria
+  - schedule/milestones/payment triggers
+  - fees/rates/retainer/NTE/authorization rules
+  - material assumptions/dependencies shifting cost/risk allocation
+- Draft a **new SOW** when it is a separate workstream that can be cleanly scoped without rewriting prior deliverables/acceptance/payment terms.
+
+Tie-breakers:
+- Add-on scope that can be appended without changing original deliverables → default **new SOW**.
+- If you must rewrite original deliverables/acceptance/payment terms → default **CO**.
+
+## CO triggers by SOW type
+- Fixed Bid: CO required for any change to scope/deliverables/acceptance/schedule/fees.
+- T&M: no CO for routine work within “Services Included”; CO only for commercial/legal controls (NTE, rates, authorization, Go-Live/payment prerequisites, material assumption shifts).
+- Maintenance: included services → no new paper; excluded services → apply New SOW vs CO decision rule.
+
+## CO drafting requirements (template-aligned)
+Use: `docs/legal/contracts/Change Order Template.md`
+
+Required outcomes:
+- Reference documents (MSA date, original SOW number/date, project name).
+- Section 1 Added/Removed/Modified scope must be specific.
+- Impact tables must show **concrete deltas** (what changed vs original).
+- Fees impact must match SOW model (fixed bid vs T&M).
+- Assumptions/dependencies must be stated.
+
+## Output location
+- `docs/legal/Drafts/Change_Orders/CO-####/CO-#### - Change Order - [short-title].md`
+
+## Tracking table (required)
+At top of the CO draft, include a Tracking table with:
+- DocID (CO-####)
+- Status: Draft
+- Related IDs: controlling `SOW-####`
+- Date
+- Summary
+- Source: `.cursor/plans/...`
+

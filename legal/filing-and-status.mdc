@@ -1,0 +1,42 @@
+---
+description: Filing rules for docs/legal (Drafts vs Executed PDFs vs Archive) and 00-Index link/update rules.
+globs: docs/legal/**/*.{md,mdx}
+alwaysApply: false
+---
+
+# Filing + Status + Index Rules (docs/legal)
+
+## Canonical structure (locked)
+- `docs/legal/Drafts/` contains **draft markdown** documents.
+- `docs/legal/Executed/` contains **executed PDFs only** (DocuSign output). No executed markdown counterpart.
+- `docs/legal/Archive/` contains superseded/withdrawn/replaced items.
+
+## Default placement
+- New documents you draft: `docs/legal/Drafts/...`
+- Only place something under `docs/legal/Executed/...` when the user explicitly confirms it is executed/signed and you have the PDF.
+
+## Executed PDF layout (locked)
+Executed PDFs must be stored inside a per-document folder:
+- `docs/legal/Executed/SOWs/SOW-####/SOW-#### - Statement of Work - [short-title].pdf`
+- `docs/legal/Executed/Change_Orders/CO-####/CO-#### - Change Order - [short-title].pdf`
+- `docs/legal/Executed/Acceptance/AC-####/AC-#### - Acceptance Certificate - SOW-#### - [deliverable-or-milestone].pdf`
+
+## Index file (required)
+`docs/legal/00-Index.md` is the authoritative index.
+
+### When to update
+Update `docs/legal/00-Index.md` whenever you create a new doc folder (SOW/CO/AC/MSA exhibit).
+
+### Table schemas (locked)
+- SOWs: `ID | Title | Status | Effective Date | Link | Supersedes`
+- Change Orders: `ID | Related SOW | Summary | Status | Date | Link`
+- Acceptance Certificates: `ID | Related SOW | Deliverables/Milestone | Status | Acceptance Date | Link`
+- MSA/Exhibits: `Name | Status | Date | Link`
+
+### Link target rule (locked)
+- If an executed PDF exists for that ID, the **Link** must point to the PDF in `docs/legal/Executed/...`.
+- Otherwise, the **Link** must point to the draft markdown file in `docs/legal/Drafts/...`.
+
+## Plan source (locked)
+When drafting a SOW/CO, the plan source must be a file under `.cursor/plans/`.
+

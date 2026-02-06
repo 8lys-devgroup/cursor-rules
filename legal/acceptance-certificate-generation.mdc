@@ -1,0 +1,34 @@
+---
+description: Draft Acceptance Certificates (partial or final) aligned to template; enforce deliverables list and non-assertion of payment received.
+globs: docs/legal/**/*.{md,mdx}
+alwaysApply: false
+---
+
+# Acceptance Certificate Generation Rules
+
+## Preconditions
+- Identify the relevant SOW (`SOW-####`) and cite it.
+- Identify whether acceptance is partial (subset) or final.
+- Use auto-numbering rules in `auto-numbering.mdc`.
+
+## Template
+Use: `docs/legal/contracts/Acceptance Certificate Template.md`
+
+## Content rules (required)
+- AC may be partial or final.
+- The Deliverables Accepted table must list **exactly** the deliverables being accepted (name + short description).
+- Must reference SOW number/title and SOW effective date.
+- Do not assert “Payment Received occurred” unless user explicitly confirmed; keep template boilerplate language intact.
+
+## Output location
+- `docs/legal/Drafts/Acceptance/AC-####/AC-#### - Acceptance Certificate - SOW-#### - [deliverable-or-milestone].md`
+
+## Tracking table (required)
+At top of the AC draft, include a Tracking table with:
+- DocID (AC-####)
+- Status: Draft
+- Related IDs: `SOW-####` (and optional COs if relevant)
+- Date
+- Summary
+- Source: `.cursor/plans/...` if acceptance is tied to a plan; otherwise `N/A`
+
